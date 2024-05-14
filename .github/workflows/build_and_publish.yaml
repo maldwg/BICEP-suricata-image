@@ -80,7 +80,7 @@ jobs:
         if [ "$OFFICIAL_RELEASE_VERSION" == "$LATEST_PUSHED_RELEASE" ]; then
           echo "base ref: ${{ github.base_ref }}"
           # not a  manual merge 
-          if [ ${{ github.base_ref }} != "*main*" ]; then 
+          if [ ${{ github.base_ref }} != "main" ]; then 
             echo "Not a manual merge and version already built and pushed, aborting the pipeline."
             exit 1
           fi
