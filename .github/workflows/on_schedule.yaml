@@ -1,7 +1,7 @@
 name: Scheduled build of the docker image
 on:
-  # schedule:
-  #   - cron: "30 * * * *"
+  schedule:
+    - cron: "30 13 * * *"
   workflow_dispatch:
 jobs:
   build_and_publish:

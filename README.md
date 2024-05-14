@@ -5,5 +5,4 @@ The image holds every dependency necessary along with the necessary interface im
 
 
 # TODOS:
-- publish image when we cahnged smth and version already built
-- Dockerfile setup for bicep image
+- Cronjob now builds every time... 
