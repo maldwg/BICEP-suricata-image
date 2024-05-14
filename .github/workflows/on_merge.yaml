@@ -1,0 +1,11 @@
+name: PR based trigger of publish and build
+on:
+  pull_request:
+    types: closed
+    branches: main
+jobs:
+  build_and_publish:
+    uses: ./.github/workflows/build_and_publish.yaml
+    secrets: inherit
+
+

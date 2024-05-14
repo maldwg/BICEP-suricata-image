@@ -1,0 +1,128 @@
+name: Build and publish docker image
+on:
+  workflow_call:
+env:
+  BASE_IMAGE: suricata
+  BASE_IMAGE_USER: maxldwg
+  IMAGE_NAME: bicep-suricata
+  DOCKER_USER: maxldwg
+
+jobs:
+  get_latest_version:
+    runs-on: ubuntu-latest
+    outputs:
+        OFFICIAL_RELEASE_VERSION: ${{ steps.sets_OFFICIAL_RELEASE_VERSION.outputs.OFFICIAL_RELEASE_VERSION }}
+    steps:
+    - name: Retrieve latest official version published on dockerhub
+      shell: bash
+      run: |
+        status_code_accessing_dockerhub=$(curl -o response.json -w "%{http_code}"  -s "https://registry.hub.docker.com/v2/repositories/$BASE_IMAGE_USER/$BASE_IMAGE/tags")
+        tag_count_on_dockerhub=$(cat response.json | jq '.results | length')
+      
+        if [ "$status_code_accessing_dockerhub" -eq 404 ]; then
+            echo "Package not found."
+            OFFICIAL_RELEASE_VERSION=""
+        elif [ "$status_code_accessing_dockerhub" -eq 200 ]; then
+              for RELEASE_NR in $(seq 0 $(($tag_count_on_dockerhub - 1)))
+              do
+                OFFICIAL_RELEASE_VERSION=$(cat response.json | jq --argjson RELEASE_NR "$RELEASE_NR" -r '.results[$RELEASE_NR].name')
+                if [[ "$OFFICIAL_RELEASE_VERSION" == "latest" ]]; then
+                  echo "Found latest release with tag latest instead of version number, progressing ..."
+                else
+                  echo "Found latest release with version number ${OFFICIAL_RELEASE_VERSION}"
+                  break
+                fi
+              done
+            if [ -z $OFFICIAL_RELEASE_VERSION ]; then
+              echo "Found the registry repository, but could not find latest version in the tags"
+            fi
+        else
+            echo "Unexpected HTTP status code: $status_code_accessing_dockerhub"
+            break
+        fi    
+        echo "OFFICIAL_RELEASE_VERSION=$OFFICIAL_RELEASE_VERSION" >> $GITHUB_ENV
+
+    - name: check latest version published by us on Docker hub
+      shell: bash       
+      run: |
+        status_code_accessing_dockerhub=$(curl -o response.json -w "%{http_code}"  -s "https://registry.hub.docker.com/v2/repositories/$DOCKER_USER/$IMAGE_NAME/tags")
+        tag_count_on_dockerhub=$(cat response.json | jq '.results | length')
+      
+        if [ "$status_code_accessing_dockerhub" -eq 404 ]; then
+            echo "Package not found."
+            LATEST_PUSHED_RELEASE=""
+        elif [ "$status_code_accessing_dockerhub" -eq 200 ]; then
+              for RELEASE_NR in $(seq 0 $(($tag_count_on_dockerhub - 1)))
+              do
+                LATEST_PUSHED_RELEASE=$(cat response.json | jq --argjson RELEASE_NR "$RELEASE_NR" -r '.results[$RELEASE_NR].name')
+                if [[ "$LATEST_PUSHED_RELEASE" == "latest" ]]; then
+                  echo "Found latest release with tag latest instead of version number, progressing ..."
+                else
+                  echo "Found latest release with version number ${LATEST_PUSHED_RELEASE}"
+                  break
+                fi
+              done
+            if [ -z $LATEST_PUSHED_RELEASE ]; then
+              echo "Found the registry repository, but could not find latest version in the tags"
+            fi
+        else
+            echo "Unexpected HTTP status code: $status_code_accessing_dockerhub"
+            break
+        fi
+        echo "LATEST_PUSHED_RELEASE=$LATEST_PUSHED_RELEASE" >> $GITHUB_ENV
+
+    - name: comparing official version and latest release by us
+      id: sets_OFFICIAL_RELEASE_VERSION
+      shell: bash
+      run: |
+        echo "Newest version: $OFFICIAL_RELEASE_VERSION"
+        echo "Latest version built: $LATEST_PUSHED_RELEASE"
+        if [ "$OFFICIAL_RELEASE_VERSION" == "$LATEST_PUSHED_RELEASE" ]; then
+          echo "base ref: ${{ github.base_ref }}"
+          # not a  manual merge 
+          if [ ${{ github.base_ref }} != "*main*" ]; then 
+            echo "Not a manual merge and version already built and pushed, aborting the pipeline."
+            exit 1
+          fi
+        fi
+        echo "OFFICIAL_RELEASE_VERSION=$OFFICIAL_RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+
+  build_and_push:
+      runs-on: ubuntu-latest
+      needs: get_latest_version
+      steps:  
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: set variable name to human readbale 
+        run: |
+          echo "OFFICIAL_RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+        env:
+          VERSION: ${{ needs.get_latest_version.outputs.OFFICIAL_RELEASE_VERSION }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: create tags string
+        run: echo "TAGS=$DOCKER_USER/$IMAGE_NAME:latest,$DOCKER_USER/$IMAGE_NAME:$OFFICIAL_RELEASE_VERSION" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./bicep-suricata
+          file: ./bicep-suricata/Dockerfile
+          push: true
+          tags: ${{ env.TAGS }}
+          build-args: | 
+            BASE_IMAGE=${{ env.BASE_IMAGE_USER }}/${{ env.BASE_IMAGE }}
+            VERSION=${{ env.OFFICIAL_RELEASE_VERSION }}
+
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          repository: ${{ env.DOCKER_USER }}/${{ env.IMAGE_NAME}}

@@ -1,0 +1,9 @@
+name: Scheduled build of the docker image
+on:
+  # schedule:
+  #   - cron: "30 * * * *"
+  workflow_dispatch:
+jobs:
+  build_and_publish:
+    uses: ./.github/workflows/build_and_publish.yaml
+    secrets: inherit
