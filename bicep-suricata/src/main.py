@@ -1,3 +1,20 @@
-import time
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from src.utils.fastapi import routes
+from src.models.suricata import Suricata
+app = FastAPI()
 
-print("hello world")
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(routes.router)
+ids = Suricata()
