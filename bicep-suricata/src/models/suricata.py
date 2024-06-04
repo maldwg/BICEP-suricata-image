@@ -1,6 +1,5 @@
 from  src.utils.models.ids_base import IDSBase
 from fastapi import UploadFile
-import os
 import shutil
 
 # TODO: correct paths 
@@ -11,4 +10,8 @@ class Suricata(IDSBase):
 
     def configure(self, temporary_file):
         shutil.move(temporary_file, self.configuration_location)
-        return "succesfuly moved file"
+        return "succesfuly configured"
+    
+    def configure_ruleset(self, temporary_file):
+        shutil.move(temporary_file, self.ruleset_location)
+        return "succesfuly setup ruleset"
