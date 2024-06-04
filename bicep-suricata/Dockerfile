@@ -13,6 +13,7 @@ COPY ./src/ /opt/code/src
 
 RUN pip3 install -r requirements.txt
 
+# path to locate the IDSBase implementation
 ENV IDS_MODULE=src.models.suricata
 ENV IDS_CLASS=Suricata
 

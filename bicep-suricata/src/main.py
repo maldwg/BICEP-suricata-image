@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.utils.fastapi import routes
-from src.models.suricata import Suricata
 app = FastAPI()
 
 origins = [
@@ -17,4 +16,3 @@ app.add_middleware(
 )
 
 app.include_router(routes.router)
-ids = Suricata()
