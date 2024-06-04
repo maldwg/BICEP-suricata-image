@@ -3,7 +3,6 @@ ARG VERSION
 FROM ${BASE_IMAGE}:${VERSION}
 
 RUN apt install python3-pip -y
-RUN rm /usr/lib/python3.12/EXTERNALLY-MANAGED 
 
 RUN mkdir /opt/code
 WORKDIR /opt/code
