@@ -1,11 +1,11 @@
 from  src.utils.models.ids_base import IDSBase
 from src.utils.fastapi.routes import tell_core_analysis_has_finished
 import shutil
-from ..utils.fastapi.utils import execute_command, wait_for_process_completion
+from ..utils.fastapi.utils import execute_command, wait_for_process_completion, stop_process
 
 class Suricata(IDSBase):
     configuration_location: str = "/tmp/suricata.yaml"
-    ruleset_location: str = "/tmp/rules.yaml"
+    ruleset_location: str = "/tmp/custom_rules.rules"
     container_id: int = None
     pid: int = None
 
@@ -22,18 +22,13 @@ class Suricata(IDSBase):
     
     async def startStaticAnalysis(self, file_path, container_id):
         self.container_id = container_id
-        # TODO: add config as well + ruleset?
-        command = ["suricata", "-r", file_path]
+        command = ["suricata", "-c", self.configuration_location, "-S", self.ruleset_location,  "-r", file_path]
         pid = await execute_command(command)
         self.pid = pid
-        return_code = await wait_for_process_completion(pid)
-        if return_code is not None:
-            return f"Process with PID {pid} has exited with return code {return_code}"
-        else:
-            return f"Process with PID {pid} does not exist"
+        await wait_for_process_completion(pid)
+        await self.stopAnalysis()            
     
     async def stopAnalysis(self):
-        # TODO: stop the process using the pid
+        await stop_process(self.pid)
+        self.pid = None
         await tell_core_analysis_has_finished(container_id=self.container_id)
-        return "Stopped analysis"
-
