@@ -2,7 +2,7 @@ ARG BASE_IMAGE
 ARG VERSION
 FROM ${BASE_IMAGE}:${VERSION}
 
-RUN apt install python3-pip -y
+RUN apt install python3-pip iproute2 -y
 
 RUN mkdir /opt/code
 WORKDIR /opt/code
