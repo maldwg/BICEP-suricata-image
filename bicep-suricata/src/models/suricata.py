@@ -7,7 +7,6 @@ from ..utils.fastapi.utils import execute_command, wait_for_process_completion, 
 class Suricata(IDSBase):
     configuration_location: str = "/tmp/suricata.yaml"
     log_location: str = "/opt/logs"
-    container_id: int = None
     pid: int = None
     # the interface to listen on in network analysis modes
     network_interface = "eth0"
@@ -49,8 +48,3 @@ class Suricata(IDSBase):
         self.pid = pid
         await wait_for_process_completion(pid)
         await self.stopAnalysis()            
-    
-    async def stopAnalysis(self):
-        await stop_process(self.pid)
-        self.pid = None
-        await tell_core_analysis_has_finished(container_id=self.container_id)
