@@ -37,7 +37,7 @@ class Suricata(IDSBase):
         command = ["suricata", "-c", self.configuration_location, "-i", self.network_interface, "-l", self.log_location]
         pid = await execute_command(command)
         self.pid = pid
-        return {"message": f"started network analysis for container with {self.container_id}"}
+        return f"started network analysis for container with {self.container_id}"
     
     async def startStaticAnalysis(self, file_path):
         command = ["suricata", "-c", self.configuration_location, "-S", self.ruleset_location,  "-r", file_path, "-l", self.log_location]
