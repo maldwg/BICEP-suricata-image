@@ -14,7 +14,7 @@ class SuricataParser(IDSParser):
         with open(file_location, "r") as file:
             for line in file:
                 line_as_json = json.loads(line)
-                parsed_lines.append(self.parse_line(line_as_json))
+                parsed_lines.append(await self.parse_line(line_as_json))
 
         # remove file to prevent double sending results after next execution
         os.remove(file_location)
@@ -28,7 +28,7 @@ class SuricataParser(IDSParser):
         with open(file_location, "r") as file:
             for line in file:
                 line_as_json = json.loads(line)
-                parsed_lines.append(self.parse_line(line_as_json))
+                parsed_lines.append(await self.parse_line(line_as_json))
 
         # remove file to prevent double sending results after next execution
         os.remove(file_location)
@@ -44,11 +44,11 @@ class SuricataParser(IDSParser):
         parsed_line.type = line.get("event_type")
 
 
-        # TODO 6: find out scale and adapt (0 to 1 or 0 to 10?)
         # since different findings render different results, handle each type differently
+        # severity from 1 to 3, 1 being the highest
         if parsed_line.type == "alert":
             parsed_line.message = line.get("alert").get("signature")
-            parsed_line.severity = line.get("alert").get("severity")
+            parsed_line.severity = self.normalize_threat_levels(line.get("alert").get("severity"))
         elif parsed_line.type == "anomaly":
             parsed_line.message = line.get("anomaly").get("event")
             # None, because for anomalys suricata does not provicde any details
@@ -56,5 +56,15 @@ class SuricataParser(IDSParser):
         # since it is an array, acces the first element, then get the ip, the result is also in an array
 
 
-
         return parsed_line
+    
+    async def normalize_threat_levels(self, threat: int):
+        # for suricata, 3 is the lowest threat level and 1 the highest 
+        # --> 1 = 1 , 2 = 0.66, 3 = 0.33
+        if threat is not None:
+            if threat == 1:
+                return 1
+            elif threat == 2:
+                return 0.66
+            elif threat == 3:
+                return 0.33
