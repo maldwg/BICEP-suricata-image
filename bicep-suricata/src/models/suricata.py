@@ -37,7 +37,7 @@ class Suricata(IDSBase):
         command = ["ip", "link", "set", self.network_interface, "promisc", "on"]
         await execute_command(command)
 
-        command = ["suricata", "-c", self.configuration_location, "-i", self.network_interface, "-l", self.log_location]
+        command = ["suricata", "-c", self.configuration_location, "-i", self.network_interface, "-S", self.ruleset_location, "-l", self.log_location]
         pid = await execute_command(command)
         self.pid = pid
 
