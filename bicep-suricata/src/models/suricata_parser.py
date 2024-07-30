@@ -22,7 +22,7 @@ class SuricataParser(IDSParser):
 
     async def parse_line(self, line):
         parsed_line = Alert()
-        parsed_line.time = datetime.strptime(line.get("timestamp"), self.timestamp_format) 
+        parsed_line.time = line.get("timestamp") 
         parsed_line.source = line.get("src_ip") + ":" + str(line.get("src_port"))
         parsed_line.destination = line.get("dest_ip") + ":" + str(line.get("dest_port"))
         parsed_line.type = line.get("event_type")
@@ -36,7 +36,7 @@ class SuricataParser(IDSParser):
         elif parsed_line.type == "anomaly":
             parsed_line.message = line.get("anomaly").get("event")
             # None, because for anomalys suricata does not provicde any details
-            parsed_line.severity = 0
+            parsed_line.severity = None
         # since it is an array, acces the first element, then get the ip, the result is also in an array
 
         return parsed_line
@@ -47,9 +47,9 @@ class SuricataParser(IDSParser):
         # --> 1 = 1 , 2 = 0.66, 3 = 0.33
         if threat is not None:
             if threat == 1:
-                return 1
+                return 1.0
             elif threat == 2:
                 return 0.66
             elif threat == 3:
                 return 0.33
-        return 0
+        return None
