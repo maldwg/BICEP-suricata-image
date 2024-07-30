@@ -4,8 +4,8 @@ import os
 from datetime import datetime
 class SuricataParser(IDSParser):
 
-    # todo: 6 find location and how to fix it ?
-    alertFileLocation = ""
+    # todo: 11 scrape the whole directory  
+    alertFileLocation = "/opt/logs/alerts_and_anomalies.json"
 
     async def parse_alerts(self, file_location=alertFileLocation):
         
