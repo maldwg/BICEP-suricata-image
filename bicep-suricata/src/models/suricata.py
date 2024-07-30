@@ -46,12 +46,12 @@ class Suricata(IDSBase):
         return f"started network analysis for container with {self.container_id}"
     
     async def startStaticAnalysis(self, file_path):
-        from src.utils.fastapi.routes import send_alerts_to_core
         command = ["suricata", "-c", self.configuration_location, "-S", self.ruleset_location,  "-r", file_path, "-l", self.log_location]
         pid = await execute_command(command)
         self.pid = pid
         await wait_for_process_completion(pid)
-        await send_alerts_to_core(ids=self)
+        res = await send_alerts_to_core(ids=self)
+        print(res)
         await self.stopAnalysis()            
 
 
@@ -60,6 +60,8 @@ class Suricata(IDSBase):
         from src.utils.fastapi.utils import stop_process, tell_core_analysis_has_finished
 
         await stop_process(self.pid)
-        await self.send_alerts_task.cancel()
+        if self.send_alerts_task != None:
+            await self.send_alerts_task.cancel()
+            self.send_alerts_task = None
         self.pid = None
         await tell_core_analysis_has_finished(self)

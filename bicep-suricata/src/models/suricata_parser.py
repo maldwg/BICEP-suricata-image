@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 class SuricataParser(IDSParser):
 
-    # todo: 11 scrape the whole directory  
+    # TODO: 11 scrape the whole directory  
     alertFileLocation = "/opt/logs/alerts_and_anomalies.json"
 
     async def parse_alerts(self, file_location=alertFileLocation):
@@ -18,7 +18,6 @@ class SuricataParser(IDSParser):
 
         # remove file to prevent double sending results after next execution
         os.remove(file_location)
-
         return parsed_lines      
 
     async def parse_line(self, line):
@@ -33,15 +32,15 @@ class SuricataParser(IDSParser):
         # severity from 1 to 3, 1 being the highest
         if parsed_line.type == "alert":
             parsed_line.message = line.get("alert").get("signature")
-            parsed_line.severity = self.normalize_threat_levels(line.get("alert").get("severity"))
+            parsed_line.severity = await self.normalize_threat_levels(line.get("alert").get("severity"))
         elif parsed_line.type == "anomaly":
             parsed_line.message = line.get("anomaly").get("event")
             # None, because for anomalys suricata does not provicde any details
-            parsed_line.severity = None
+            parsed_line.severity = 0
         # since it is an array, acces the first element, then get the ip, the result is also in an array
 
-
         return parsed_line
+    
     
     async def normalize_threat_levels(self, threat: int):
         # for suricata, 3 is the lowest threat level and 1 the highest 
@@ -53,3 +52,4 @@ class SuricataParser(IDSParser):
                 return 0.66
             elif threat == 3:
                 return 0.33
+        return 0
