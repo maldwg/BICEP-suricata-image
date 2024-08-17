@@ -10,7 +10,7 @@ class Suricata(IDSBase):
     configuration_location: str = "/tmp/suricata.yaml"
     log_location: str = "/opt/logs"
     pid: int = None
-    send_alerts_task = None
+    send_alerts_periodically_task = None
     # the interface to listen on in network analysis modes
     network_interface = "eth0"
 
@@ -41,7 +41,7 @@ class Suricata(IDSBase):
         pid = await execute_command(command)
         self.pid = pid
 
-        self.send_alerts_task = asyncio.create_task(send_alerts_to_core_periodically(ids=self))
+        self.send_alerts_periodically_task = asyncio.create_task(send_alerts_to_core_periodically(ids=self))
 
         return f"started network analysis for container with {self.container_id}"
     
@@ -50,18 +50,23 @@ class Suricata(IDSBase):
         pid = await execute_command(command)
         self.pid = pid
         await wait_for_process_completion(pid)
+        self.pid = None
         res = await send_alerts_to_core(ids=self)
-        print(res)
         await self.stopAnalysis()            
 
 
     # overrides the default method
     async def stopAnalysis(self):
         from src.utils.fastapi.utils import stop_process, tell_core_analysis_has_finished
-
-        await stop_process(self.pid)
-        if self.send_alerts_task != None:
-            await self.send_alerts_task.cancel()
-            self.send_alerts_task = None
-        self.pid = None
+        # when triggered after the static analysis , then this is already none and can be skipped
+        if self.pid != None:
+            await stop_process(self.pid)
+            self.pid = None
+        if self.send_alerts_periodically_task != None:
+            # TODO 9: stop does not work: 
+            #     await self.send_alerts_periodically_task.cancel()
+            # TypeError: object bool can't be used in 'await' expression
+            print(self.send_alerts_periodically_task)
+            await self.send_alerts_periodically_task.cancel()
+            self.send_alerts_periodically_task = None
         await tell_core_analysis_has_finished(self)

@@ -1,16 +1,19 @@
 from src.utils.models.ids_base import IDSParser, Alert
 import json
 import os
+import os.path
 from datetime import datetime
 class SuricataParser(IDSParser):
 
-    # TODO: 11 scrape the whole directory  
+    # TODO: 10 scrape the whole directory  
     alertFileLocation = "/opt/logs/alerts_and_anomalies.json"
 
     async def parse_alerts(self, file_location=alertFileLocation):
         
         parsed_lines = []
-
+        if not os.path.isfile(file_location):
+            return parsed_lines
+        
         with open(file_location, "r") as file:
             for line in file:
                 line_as_json = json.loads(line)
