@@ -6,9 +6,9 @@ from datetime import datetime
 class SuricataParser(IDSParser):
 
     # TODO: 10 scrape the whole directory  
-    alertFileLocation = "/opt/logs/alerts_and_anomalies.json"
+    alert_file_location = "/opt/logs/alerts_and_anomalies.json"
 
-    async def parse_alerts(self, file_location=alertFileLocation):
+    async def parse_alerts(self, file_location=alert_file_location):
         
         parsed_lines = []
         if not os.path.isfile(file_location):
