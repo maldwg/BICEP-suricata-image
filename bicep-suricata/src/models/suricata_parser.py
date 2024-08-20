@@ -19,8 +19,8 @@ class SuricataParser(IDSParser):
                 line_as_json = json.loads(line)
                 parsed_lines.append(await self.parse_line(line_as_json))
 
-        # remove file to prevent double sending results after next execution
-        os.remove(file_location)
+        # erase files content but do not delete the file itself
+        open(file_location, 'w').close()
         return parsed_lines      
 
     async def parse_line(self, line):

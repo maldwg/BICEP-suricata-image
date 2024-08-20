@@ -62,11 +62,9 @@ class Suricata(IDSBase):
         if self.pid != None:
             await stop_process(self.pid)
             self.pid = None
-        if self.send_alerts_periodically_task != None:
-            # TODO 9: stop does not work: 
-            #     await self.send_alerts_periodically_task.cancel()
-            # TypeError: object bool can't be used in 'await' expression
+        if self.send_alerts_periodically_task != None:            
             print(self.send_alerts_periodically_task)
-            await self.send_alerts_periodically_task.cancel()
+            if not self.send_alerts_periodically_task.done():
+                self.send_alerts_periodically_task.cancel()
             self.send_alerts_periodically_task = None
         await tell_core_analysis_has_finished(self)
