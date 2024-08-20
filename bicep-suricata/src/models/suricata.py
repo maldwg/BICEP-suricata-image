@@ -9,8 +9,6 @@ from ..utils.models.ids_base import Alert
 class Suricata(IDSBase):
     configuration_location: str = "/tmp/suricata.yaml"
     log_location: str = "/opt/logs"
-    pid: int = None
-    send_alerts_periodically_task = None
     # the interface to listen on in network analysis modes
     network_interface = "eth0"
 
@@ -51,13 +49,15 @@ class Suricata(IDSBase):
         self.pid = pid
         await wait_for_process_completion(pid)
         self.pid = None
-        res = await send_alerts_to_core(ids=self)
+        if self.static_analysis_running:
+            await send_alerts_to_core(ids=self)
         await self.stopAnalysis()            
 
 
     # overrides the default method
     async def stopAnalysis(self):
         from src.utils.fastapi.utils import stop_process, tell_core_analysis_has_finished
+        self.static_analysis_running = False
         # when triggered after the static analysis , then this is already none and can be skipped
         if self.pid != None:
             await stop_process(self.pid)
