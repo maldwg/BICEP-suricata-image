@@ -3,12 +3,13 @@ import json
 import os
 import os.path
 from datetime import datetime
+from ..utils.general_utilities import ANALYSIS_MODES
 class SuricataParser(IDSParser):
 
     # TODO: 10 scrape the whole directory  
     alert_file_location = "/opt/logs/alerts_and_anomalies.json"
 
-    async def parse_alerts(self, file_location=alert_file_location):
+    async def parse_alerts(self, analysis_mode: ANALYSIS_MODES,file_location=alert_file_location):
         
         parsed_lines = []
         if not os.path.isfile(file_location):
@@ -16,7 +17,11 @@ class SuricataParser(IDSParser):
         
         with open(file_location, "r") as file:
             for line in file:
-                line_as_json = json.loads(line)
+                try:
+                    line_as_json = json.loads(line)
+                except:
+                    print(f"could not parse line {line} \n ... skipping")
+                    continue
                 parsed_lines.append(await self.parse_line(line_as_json))
 
         # erase files content but do not delete the file itself
