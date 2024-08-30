@@ -6,7 +6,7 @@ from datetime import datetime
 from ..utils.general_utilities import ANALYSIS_MODES
 class SuricataParser(IDSParser):
 
-    # TODO: 10 scrape the whole directory  
+    # TODO: 11 scrape the whole directory  
     alert_file_location = "/opt/logs/alerts_and_anomalies.json"
 
     async def parse_alerts(self, analysis_mode: ANALYSIS_MODES,file_location=alert_file_location):
