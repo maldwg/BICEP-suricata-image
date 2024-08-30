@@ -17,7 +17,6 @@ class Suricata(IDSBase):
     async def configure(self, file_path):
         shutil.move(file_path, self.configuration_location)
         self.tap_interface_name = f"tap{self.container_id}"
-        await create_and_activate_network_interface(self.tap_interface_name)
         await self.enhance_suricata_config_to_allow_for_ensemble()
         try:
             os.mkdir(self.log_location)
@@ -33,6 +32,7 @@ class Suricata(IDSBase):
         return "succesfuly setup ruleset"
 
     async def startNetworkAnalysis(self):
+        await create_and_activate_network_interface(self.tap_interface_name)
         pid = await mirror_network_traffic_to_interface(default_interface="eth0", tap_interface=self.tap_interface_name)
         self.pids.append(pid)
         start_suricata = ["suricata", "-c", self.configuration_location, "-i", self.tap_interface_name, "-S", self.ruleset_location, "-l", self.log_location]
@@ -71,6 +71,7 @@ class Suricata(IDSBase):
         await tell_core_analysis_has_finished(self)
 
     async def enhance_suricata_config_to_allow_for_ensemble(self):
+        # TODO 5: make more robust so that if key afp-packet not existing new config is added
         yaml = ruamel.yaml.YAML()
         with open(self.configuration_location, "r") as suricata_yaml:
             config = yaml.load(suricata_yaml)
