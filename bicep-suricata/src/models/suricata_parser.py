@@ -31,8 +31,10 @@ class SuricataParser(IDSParser):
     async def parse_line(self, line):
         parsed_line = Alert()
         parsed_line.time = line.get("timestamp") 
-        parsed_line.source = line.get("src_ip") + ":" + str(line.get("src_port"))
-        parsed_line.destination = line.get("dest_ip") + ":" + str(line.get("dest_port"))
+        parsed_line.source_ip = line.get("src_ip")
+        parsed_line.source_port = str(line.get("src_port"))
+        parsed_line.destination_ip = line.get("dest_ip") 
+        parsed_line.destination_port = str(line.get("dest_port"))
         parsed_line.type = line.get("event_type")
 
 
