@@ -3,7 +3,7 @@ from  src.utils.models.ids_base import IDSBase
 import shutil
 import os
 from ..utils.general_utilities import create_and_activate_network_interface,remove_network_interface,mirror_network_traffic_to_interface,execute_command, wait_for_process_completion
-from ..utils.fastapi.utils import  send_alerts_to_core, send_alerts_to_core_periodically
+from ..utils.fastapi.utils import  send_alerts_to_core, send_alerts_to_core_periodically, send_alerts_and_stop_analysis
 from .suricata_parser import SuricataParser
 import ruamel.yaml
 
@@ -13,6 +13,7 @@ class Suricata(IDSBase):
     # unique variables
     ruleset_location: str = "/tmp/custom_rules.rules"
     parser = SuricataParser()
+
 
     async def configure(self, file_path):
         shutil.move(file_path, self.configuration_location)
@@ -51,8 +52,11 @@ class Suricata(IDSBase):
         await wait_for_process_completion(pid)
         self.pids.remove(pid)
         if self.static_analysis_running:
-            await send_alerts_to_core(ids=self)
-        await self.stopAnalysis()            
+            task= asyncio.create_task(send_alerts_and_stop_analysis(ids=self))
+            self.background_tasks.add(task)
+            task.add_done_callback(self.background_tasks.discard)
+        else:
+            await self.stopAnalysis()            
 
 
     # overrides the default method
@@ -61,11 +65,9 @@ class Suricata(IDSBase):
         self.static_analysis_running = False
         await self.stop_all_processes()
         if self.send_alerts_periodically_task != None:            
-            print(self.send_alerts_periodically_task)
             if not self.send_alerts_periodically_task.done():
                 self.send_alerts_periodically_task.cancel()
             self.send_alerts_periodically_task = None
-        print(self.tap_interface_name)
         if self.tap_interface_name != None:
             await remove_network_interface(self.tap_interface_name)
         await tell_core_analysis_has_finished(self)

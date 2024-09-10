@@ -4,6 +4,7 @@ import os
 import os.path
 from datetime import datetime
 from ..utils.general_utilities import ANALYSIS_MODES
+from dateutil import parser 
 class SuricataParser(IDSParser):
 
     # TODO: 11 scrape the whole directory  
@@ -22,7 +23,9 @@ class SuricataParser(IDSParser):
                 except:
                     print(f"could not parse line {line} \n ... skipping")
                     continue
-                parsed_lines.append(await self.parse_line(line_as_json))
+                parsed_alert = await self.parse_line(line_as_json)
+                if parsed_alert:
+                    parsed_lines.append(parsed_alert)
 
         # erase files content but do not delete the file itself
         open(file_location, 'w').close()
@@ -30,13 +33,19 @@ class SuricataParser(IDSParser):
 
     async def parse_line(self, line):
         parsed_line = Alert()
-        parsed_line.time = line.get("timestamp") 
+        timestamp = line.get("timestamp") 
+        parsed_line.time = parser.parse(timestamp).replace(tzinfo=None).isoformat()
         parsed_line.source_ip = line.get("src_ip")
         parsed_line.source_port = str(line.get("src_port"))
         parsed_line.destination_ip = line.get("dest_ip") 
         parsed_line.destination_port = str(line.get("dest_port"))
         parsed_line.type = line.get("event_type")
 
+
+        # only include alerts that have a chance to be matched to the csv files
+        # removing them here does nothing, as they youldn be matched anyways and wouldn't affect the statistics besides unassigned_requests 
+        if not parsed_line.time or not parsed_line.source_ip or not parsed_line.source_port or not parsed_line.destination_ip or not parsed_line.destination_port:
+            return None
 
         # since different findings render different results, handle each type differently
         # severity from 1 to 3, 1 being the highest
