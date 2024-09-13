@@ -2,7 +2,7 @@ import asyncio
 from  src.utils.models.ids_base import IDSBase
 import shutil
 import os
-from ..utils.general_utilities import create_and_activate_network_interface,remove_network_interface,mirror_network_traffic_to_interface,execute_command, wait_for_process_completion
+from ..utils.general_utilities import execute_command
 from .suricata_parser import SuricataParser
 import ruamel.yaml
 
