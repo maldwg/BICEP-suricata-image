@@ -10,13 +10,13 @@ class SuricataParser(IDSParser):
     # TODO: 11 scrape the whole directory  
     alert_file_location = "/opt/logs/alerts_and_anomalies.json"
 
-    async def parse_alerts(self, analysis_mode: ANALYSIS_MODES,file_location=alert_file_location):
+    async def parse_alerts(self):
         
         parsed_lines = []
-        if not os.path.isfile(file_location):
+        if not os.path.isfile(self.alert_file_location):
             return parsed_lines
         
-        with open(file_location, "r") as file:
+        with open(self.alert_file_location, "r") as file:
             for line in file:
                 try:
                     line_as_json = json.loads(line)
@@ -28,7 +28,7 @@ class SuricataParser(IDSParser):
                     parsed_lines.append(parsed_alert)
 
         # erase files content but do not delete the file itself
-        open(file_location, 'w').close()
+        open(self.alert_file_location, 'w').close()
         return parsed_lines      
 
     async def parse_line(self, line):
