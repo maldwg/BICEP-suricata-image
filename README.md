@@ -13,3 +13,13 @@ git submodule init
 git submodule update
 ```
 This fetches the newest version of the submodule for the backend code and is necessary for the application to work seamlessly.
+
+
+
+## Building the project
+TO build a local version of the image for testing purposes, simply run:
+``` 
+cd ./bicep-suricata
+docker buildx build . --build-arg BASE_IMAGE=maxldwg/suricata --build-arg VERSION=7.0.6 -t maxldwg/bicep-suricata:latest --no-cache
+```
+Change the version to your desried one
