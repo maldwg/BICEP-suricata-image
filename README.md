@@ -1,3 +1,11 @@
+<div align="center">
+<img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/maxldwg/bicep-suricata/latest?style=for-the-badge&logo=docker&label=Latest%20Version&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fmaxldwg%2Fbicep-suricata">
+<img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/maxldwg/bicep-suricata?style=for-the-badge&logo=docker&logoColor=blue&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fmaxldwg%2Fbicep-suricata">
+
+<br>
+
+</div>
+
 # BICEP-suricata-image
 Suricata docker image adapated for BICEP
 
