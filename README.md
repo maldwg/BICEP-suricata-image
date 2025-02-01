@@ -1,6 +1,8 @@
 <div align="center">
 <img alt="Docker Image Version (tag)" src="https://img.shields.io/docker/v/maxldwg/bicep-suricata/latest?style=for-the-badge&logo=docker&label=Latest%20Version&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fmaxldwg%2Fbicep-suricata">
 <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/maxldwg/bicep-suricata?style=for-the-badge&logo=docker&logoColor=blue&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fmaxldwg%2Fbicep-suricata">
+<img alt="Codecov" src="https://img.shields.io/codecov/c/github/maldwg/BICEP-suricata?style=for-the-badge">
+<img alt="GitHub branch status" src="https://img.shields.io/github/checks-status/maldwg/BICEP-suricata/main?style=for-the-badge&label=Tests">
 
 <br>
 
@@ -12,6 +14,11 @@ Suricata docker image adapated for BICEP
 The image holds every dependency necessary along with the necessary interface implemented, in order to work with the BICEP application
 
 The main BICEP project is available [here](https://github.com/maldwg/BICEP/tree/main)
+
+## Usage
+
+If you want to use the resulting image with the BICEP framework, keep in mind that in its current version, the Suricata container will need a config that outputs alerts to /opt/logs/alerts_and_anomalies.json. If you do not log to this location, the analysis willnot work properly. A feature for including a whole use selected directory is planned.
+
 
 ## Initialize project
 
@@ -31,3 +38,4 @@ cd ./bicep-suricata
 docker buildx build . --build-arg BASE_IMAGE=maxldwg/suricata --build-arg VERSION=7.0.6 -t maxldwg/bicep-suricata:latest --no-cache
 ```
 Change the version to your desried one
+
