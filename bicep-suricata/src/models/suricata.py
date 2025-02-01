@@ -16,7 +16,6 @@ class Suricata(IDSBase):
 
     async def configure(self, file_path):
         shutil.move(file_path, self.configuration_location)
-        self.tap_interface_name = f"tap{self.container_id}"
         await self.enhance_suricata_config_to_allow_for_ensemble()
         try:
             os.mkdir(self.log_location)
