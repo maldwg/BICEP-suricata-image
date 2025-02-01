@@ -2,3 +2,4 @@ fastapi[all]
 psutil
 ruamel.yaml
 python-dateutil
+pytest
