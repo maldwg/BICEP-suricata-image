@@ -1,0 +1,24 @@
+name: Test the code on every push
+on: push
+jobs:
+    test_the_plugin:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                submodules: 'true'
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: 3.12
+
+            - name: install requirements
+              run: pip3 install -r ./bicep-suricata/requirements.txt
+
+            - name: execute bicep-suricata-image tests
+              run: pytest ./bicep-suricata/src/tests --cov-branch --cov-report=xml --cov
+
+            - name: Upload coverage reports to Codecov
+              uses: codecov/codecov-action@v5
