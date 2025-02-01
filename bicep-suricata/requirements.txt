@@ -3,3 +3,5 @@ psutil
 ruamel.yaml
 python-dateutil
 pytest
+pytest-cov
+pytest-asyncio
