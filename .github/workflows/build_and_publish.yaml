@@ -93,6 +93,8 @@ jobs:
       steps:  
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          submodules: 'true'
 
       - name: set variable name to human readbale 
         run: |
