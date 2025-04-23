@@ -135,3 +135,39 @@ async def test_normalize_threat_levels(parser: SuricataParser):
     assert await parser.normalize_threat_levels(3) == 0.33
     assert await parser.normalize_threat_levels(4) is None
     assert await parser.normalize_threat_levels(None) is None
+    
+    
+@pytest.mark.asyncio
+async def test_parse_line_unsupported_event_type(parser: SuricataParser):
+    # Missing dest_ip and dest_port
+    line_data = {
+        "timestamp":"2017-07-07T09:00:35.000000+0000",
+        "flow_id":844425276156800,
+        "pcap_cnt":347,
+        "event_type":"unsupported",
+        "src_ip":"192.168.10.9",
+        "src_port":1033,
+        "dest_ip":"192.168.10.3",
+        "dest_port":88,
+        "proto":"TCP",
+        "pkt_src":"wire/pcap",
+        "alert":{
+            "action":"allowed",
+            "gid":1,
+            "signature_id":2200074,
+            "rev":2,
+            "signature":"SURICATA TCPv4 invalid checksum",
+            "category":"Generic Protocol Command Decode",
+            "severity":3
+        },
+        "direction":"to_server",
+        "flow":{
+            "pkts_toserver":5,"pkts_toclient":2,"bytes_toserver":1858,"bytes_toclient":132,"start":"2017-07-07T09:00:35.000000+0000",
+            "src_ip":"192.168.10.9","dest_ip":"192.168.10.3","src_port":1033,"dest_port":88
+        }
+    }
+
+    
+    alert = await parser.parse_line(line_data)
+    
+    assert alert is None, "Expected None due to missing fields"
