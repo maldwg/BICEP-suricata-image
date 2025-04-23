@@ -56,8 +56,10 @@ class SuricataParser(IDSParser):
             parsed_line.message = line.get("anomaly").get("event")
             # None, because for anomalys suricata does not provicde any details
             parsed_line.severity = None
+        else:
+            # format is not supported or not relevant, skipping
+            return None         
         # since it is an array, acces the first element, then get the ip, the result is also in an array
-
         return parsed_line
     
     
