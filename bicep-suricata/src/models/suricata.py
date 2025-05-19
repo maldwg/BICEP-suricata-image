@@ -2,7 +2,7 @@ import asyncio
 from  src.utils.models.ids_base import IDSBase
 import shutil
 import os
-from ..utils.general_utilities import exececute_command_sync_in_seperate_thread
+from ..utils.general_utilities import exececute_command_sync_in_seperate_thread, execute_command_async
 from .suricata_parser import SuricataParser
 import ruamel.yaml
 
@@ -31,24 +31,12 @@ class Suricata(IDSBase):
 
     async def execute_network_analysis_command(self):
         command = ["suricata", "-c", self.configuration_location, "-i", self.tap_interface_name, "-S", self.ruleset_location, "-l", self.log_location]
-        loop = asyncio.get_event_loop()
-        pid = await loop.run_in_executor(
-            None,
-            exececute_command_sync_in_seperate_thread,
-            command,
-            "/opt"
-        )
+        pid = await execute_command_async(command)
         return pid
     
     async def execute_static_analysis_command(self, file_path):
         command = ["suricata", "-c", self.configuration_location, "-S", self.ruleset_location,  "-r", file_path, "-l", self.log_location]
-        loop = asyncio.get_event_loop()
-        pid = await loop.run_in_executor(
-            None,
-            exececute_command_sync_in_seperate_thread,
-            command,
-            "/opt"
-        )
+        pid = await execute_command_async(command)
         return pid
 
 
