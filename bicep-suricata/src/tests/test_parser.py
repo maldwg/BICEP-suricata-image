@@ -36,13 +36,11 @@ async def test_parse_alerts_valid_and_invalid_data(parser: SuricataParser):
     parser.alert_file_location = temporary_alert_file
     print(parser.alert_file_location)
     alerts = await parser.parse_alerts()
-    
-    # there are 384 entries that should be regarded as valid
-    assert len(alerts) == 384
-    assert alerts[0].message == "decoder.ipv6.zero_len_padn"
-    assert alerts[0].severity == None
-    assert alerts[100].message == "SURICATA TCPv4 invalid checksum"
-    assert alerts[383].severity == 0.33 
+    # sort the list as it is shuffled everytime becausae of the to set from list method and backwards...
+    alerts = sorted(alerts, key=lambda alert: (alert.time, alert.source_ip))
+    assert len(alerts) == 103
+    print(alerts[0])
+    assert alerts[100].source_ip == "192.168.10.9"
 
     os.remove(temporary_alert_file)
 

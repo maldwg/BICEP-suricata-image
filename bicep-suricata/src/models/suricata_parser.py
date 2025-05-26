@@ -12,7 +12,7 @@ class SuricataParser(IDSParser):
 
     async def parse_alerts(self):
         
-        parsed_lines = []
+        parsed_lines = set()
         if not os.path.isfile(self.alert_file_location):
             return parsed_lines
         
@@ -25,11 +25,11 @@ class SuricataParser(IDSParser):
                     continue
                 parsed_alert = await self.parse_line(line_as_json)
                 if parsed_alert:
-                    parsed_lines.append(parsed_alert)
+                    parsed_lines.add(parsed_alert)
 
         # erase files content but do not delete the file itself
         open(self.alert_file_location, 'w').close()
-        return parsed_lines      
+        return list(parsed_lines)
 
     async def parse_line(self, line):
         parsed_line = Alert()
