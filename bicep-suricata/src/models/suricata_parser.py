@@ -3,7 +3,7 @@ import json
 import os
 import os.path
 from datetime import datetime
-from ..utils.general_utilities import ANALYSIS_MODES
+from ..utils.general_utilities import ANALYSIS_MODES, normalize_timestamp_for_alert
 from dateutil import parser 
 class SuricataParser(IDSParser):
 
@@ -34,7 +34,7 @@ class SuricataParser(IDSParser):
     async def parse_line(self, line):
         parsed_line = Alert()
         timestamp = line.get("timestamp") 
-        parsed_line.time = parser.parse(timestamp).replace(tzinfo=None).isoformat()
+        parsed_line.time = await normalize_timestamp_for_alert(timestamp)
         parsed_line.source_ip = line.get("src_ip")
         parsed_line.source_port = str(line.get("src_port"))
         parsed_line.destination_ip = line.get("dest_ip") 
