@@ -13,7 +13,9 @@ Suricata docker image adapated for BICEP
 
 The image holds every dependency necessary along with the necessary interface implemented, in order to work with the BICEP application
 
-The main BICEP project is available [here](https://github.com/maldwg/BICEP/tree/main)
+The main BICEP project is available [here](https://github.com/maldwg/BICEP/tree/main) <br>
+The official Suricata repository can be found [here](https://github.com/OISF/suricata)
+
 
 ## Usage
 
