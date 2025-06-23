@@ -1,3 +1,4 @@
 [submodule "bicep-suricata/src/utils"]
 	path = bicep-suricata/src/utils
 	url = https://github.com/maldwg/BICEP_Utils.git
+	branch = main
