@@ -112,8 +112,9 @@ jobs:
         run: echo "TAGS=$DOCKER_USER/$IMAGE_NAME:latest,$DOCKER_USER/$IMAGE_NAME:$OFFICIAL_RELEASE_VERSION" >> $GITHUB_ENV
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
+          platforms: linux/amd64,linux/arm64
           context: ./bicep-suricata
           file: ./bicep-suricata/Dockerfile
           push: true
