@@ -1,10 +1,14 @@
 import asyncio
-from  src.utils.models.ids_base import IDSBase
+from src.utils.models.ids_base import IDSBase
 import shutil
 import os
-from ..utils.general_utilities import exececute_command_sync_in_seperate_thread, execute_command_async
+from ..utils.general_utilities import (
+    exececute_command_sync_in_seperate_thread,
+    execute_command_async,
+)
 from .suricata_parser import SuricataParser
 import ruamel.yaml
+
 
 class Suricata(IDSBase):
     configuration_location: str = "/tmp/suricata.yaml"
@@ -13,34 +17,51 @@ class Suricata(IDSBase):
     ruleset_location: str = "/tmp/custom_rules.rules"
     parser = SuricataParser()
 
-
     async def configure(self, file_path):
         shutil.move(file_path, self.configuration_location)
-        await self.enhance_suricata_config_to_allow_for_ensemble()
         try:
-            os.mkdir(self.log_location)
+            os.makedirs(self.log_location, exist_ok=True)
+            await self.enhance_suricata_config_to_allow_for_ensemble()
             return "succesfully configured"
-        except Exception as e:
-            print(e)
-            return e
-    
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="Exception occured occured while configuring suricata. Please check the confgiuration file again and make sure it is valid!",
+            )
+
     async def configure_ruleset(self, file_path):
         shutil.move(file_path, self.ruleset_location)
         return "succesfuly setup ruleset"
 
-
     async def execute_network_analysis_command(self):
-        command = ["suricata", "-c", self.configuration_location, "-i", self.tap_interface_name, "-S", self.ruleset_location, "-l", self.log_location]
+        command = [
+            "suricata",
+            "-c",
+            self.configuration_location,
+            "-i",
+            self.tap_interface_name,
+            "-S",
+            self.ruleset_location,
+            "-l",
+            self.log_location,
+        ]
         pid = await execute_command_async(command)
         return pid
-    
+
     async def execute_static_analysis_command(self, file_path):
-        command = ["suricata", "-c", self.configuration_location, "-S", self.ruleset_location,  "-r", file_path, "-l", self.log_location]
+        command = [
+            "suricata",
+            "-c",
+            self.configuration_location,
+            "-S",
+            self.ruleset_location,
+            "-r",
+            file_path,
+            "-l",
+            self.log_location,
+        ]
         pid = await execute_command_async(command)
         return pid
-
-
-
 
     async def enhance_suricata_config_to_allow_for_ensemble(self):
         # TODO 5: make more robust so that if key afp-packet not existing new config is added
@@ -49,7 +70,7 @@ class Suricata(IDSBase):
             config = yaml.load(suricata_yaml)
             tap_interface_entry = {
                 "interface": self.tap_interface_name,
-                "cluster-id": self.container_id
+                "cluster-id": self.container_id,
             }
             config["af-packet"].append(tap_interface_entry)
         with open(self.configuration_location, "w") as suricata_yaml:

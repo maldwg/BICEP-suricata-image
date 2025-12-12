@@ -37,7 +37,7 @@ This fetches the newest version of the submodule for the backend code and is nec
 TO build a local version of the image for testing purposes, simply run:
 ``` 
 cd ./bicep-suricata
-docker buildx build . --build-arg BASE_IMAGE=maxldwg/suricata --build-arg VERSION=7.0.6 -t maxldwg/bicep-suricata:latest --no-cache
+docker buildx build . --build-arg BASE_IMAGE=maxldwg/suricata --build-arg VERSION=8.0.0 -t maxldwg/bicep-suricata:latest --no-cache
 ```
 Change the version to your desried one
 
