@@ -2,6 +2,7 @@ import asyncio
 from src.utils.models.ids_base import IDSBase
 import shutil
 import os
+from fastapi import HTTPException
 from ..utils.general_utilities import (
     exececute_command_sync_in_seperate_thread,
     execute_command_async,
