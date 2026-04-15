@@ -4,7 +4,6 @@ import shutil
 import os
 from fastapi import HTTPException
 from ..utils.general_utilities import (
-    exececute_command_sync_in_seperate_thread,
     execute_command_async,
 )
 from .suricata_parser import SuricataParser
